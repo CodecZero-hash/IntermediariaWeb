@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Cajero - Intermediaria Financiera</title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        
+        .header p {
+            margin: 5px 0 0 0;
+            opacity: 0.9;
+        }
+        
+        .logout-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            float: right;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: #c0392b;
+        }
+        
+        .section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #34495e;
+            font-weight: bold;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #2980b9;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+        }
+        
+        .btn-success:hover {
+            background: #219a52;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card h3 {
+            margin: 0;
+            font-size: 2em;
+        }
+        
+        .stat-card p {
+            margin: 5px 0 0 0;
+            opacity: 0.9;
+        }
+        
+        .search-box {
+            width: 300px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="header">
+            <button class="logout-btn" onclick="logout()">Cerrar Sesión</button>
+            <h1>Dashboard Cajero</h1>
+            <p>Panel de control para operaciones de cajero</p>
+        </div>
+
+        <!-- Alertas -->
+        <div id="alert" class="alert"></div>
+
+        <!-- Estadísticas -->
+        <div class="stats">
+            <div class="stat-card">
+                <h3 id="totalTransacciones">0</h3>
+                <p>Transacciones Hoy</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="totalMovimientos">0</h3>
+                <p>Movimientos Registrados</p>
+            </div>
+        </div>
+
+        <!-- Consultar Cuenta -->
+        <div class="section">
+            <h2>Consultar Cuenta</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="consultaCuenta">Número de Cuenta:</label>
+                    <input type="text" id="consultaCuenta" placeholder="Ingrese número de cuenta">
+                </div>
+                <div class="form-group">
+                    <button class="btn" onclick="consultarCuenta()">Consultar</button>
+                </div>
+            </div>
+            <div id="resultadoConsulta" style="display: none; margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px;">
+                <h3>Información de la Cuenta</h3>
+                <p><strong>Cliente:</strong> <span id="nombreCliente"></span></p>
+                <p><strong>Saldo Actual:</strong> <span id="saldoActual"></span></p>
+                <p><strong>Saldo Disponible:</strong> <span id="saldoDisponible"></span></p>
+                <p><strong>Tipo de Cuenta:</strong> <span id="tipoCuenta"></span></p>
+                <p><strong>Estado:</strong> <span id="estadoCuenta"></span></p>
+            </div>
+        </div>
+
+        <!-- Realizar Transacción -->
+        <div class="section">
+            <h2>Realizar Transacción</h2>
+            <form id="formTransaccion">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="tipoTransaccion">Tipo de Transacción:</label>
+                        <select id="tipoTransaccion" required>
+                            <option value="">Seleccione...</option>
+                            <option value="1">Depósito</option>
+                            <option value="2">Retiro</option>
+                            <option value="3">Transferencia</option>
+                            <option value="4">Pago de Servicios</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="montoTransaccion">Monto:</label>
+                        <input type="number" id="montoTransaccion" step="0.01" min="0" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cuentaOrigen">Cuenta Origen:</label>
+                        <input type="text" id="cuentaOrigen" placeholder="Número de cuenta origen">
+                    </div>
+                    <div class="form-group">
+                        <label for="cuentaDestino">Cuenta Destino:</label>
+                        <input type="text" id="cuentaDestino" placeholder="Número de cuenta destino">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="descripcionTransaccion">Descripción:</label>
+                    <textarea id="descripcionTransaccion" placeholder="Descripción de la transacción"></textarea>
+                </div>
+                <button type="submit" class="btn btn-success">Procesar Transacción</button>
+            </form>
+        </div>
+
+        <!-- Registrar Movimiento -->
+        <div class="section">
+            <h2>Registrar Movimiento de Cajero</h2>
+            <form id="formMovimiento">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="clienteMovimiento">ID Cliente:</label>
+                        <input type="number" id="clienteMovimiento" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cuentaMovimiento">Número de Cuenta:</label>
+                        <input type="text" id="cuentaMovimiento" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="cajeroMovimiento">ID Cajero:</label>
+                        <input type="text" id="cajeroMovimiento" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="tipoMovimiento">Tipo de Movimiento:</label>
+                        <select id="tipoMovimiento" required>
+                            <option value="">Seleccione...</option>
+                            <option value="1">Depósito en Efectivo</option>
+                            <option value="2">Retiro en Efectivo</option>
+                            <option value="3">Consulta de Saldo</option>
+                            <option value="4">Impresión de Estado</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="transaccionMovimiento">ID Transacción:</label>
+                        <input type="text" id="transaccionMovimiento">
+                    </div>
+                    <div class="form-group">
+                        <label for="facturaMovimiento">Número de Factura:</label>
+                        <input type="text" id="facturaMovimiento">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success">Registrar Movimiento</button>
+            </form>
+        </div>
+
+        <!-- Historial de Transacciones -->
+        <div class="section">
+            <h2>Historial de Transacciones</h2>
+            <input type="text" id="searchTransacciones" class="search-box" placeholder="Buscar transacciones...">
+            <div class="table-container">
+                <table id="tablaTransacciones">
+                    <thead>
+                        <tr>
+                            <th>ID Transacción</th>
+                            <th>Tipo</th>
+                            <th>Monto</th>
+                            <th>Descripción</th>
+                            <th>Fecha/Hora</th>
+                            <th>Cuenta Origen</th>
+                            <th>Cuenta Destino</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="8" class="loading">Cargando transacciones...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Historial de Movimientos -->
+        <div class="section">
+            <h2>Historial de Movimientos</h2>
+            <input type="text" id="searchMovimientos" class="search-box" placeholder="Buscar movimientos...">
+            <div class="table-container">
+                <table id="tablaMovimientos">
+                    <thead>
+                        <tr>
+                            <th>ID Movimiento</th>
+                            <th>Cliente</th>
+                            <th>Cuenta</th>
+                            <th>Cajero</th>
+                            <th>Transacción</th>
+                            <th>Fecha/Hora</th>
+                            <th>Tipo</th>
+                            <th>Factura</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="8" class="loading">Cargando movimientos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variables globales
+        let transacciones = [];
+        let movimientos = [];
+
+        // Verificar sesión al cargar
+        window.addEventListener('load', async function() {
+            try {
+                const response = await fetch('/auth/verify');
+                const data = await response.json();
+                
+                if (!data.success) {
+                    window.location.href = '/login';
+                    return;
+                }
+                
+                // Verificar que sea cajero
+                if (!data.user.role || !data.user.role.includes('CAJERO')) {
+                    alert('Acceso denegado. Solo cajeros pueden acceder a este panel.');
+                    window.location.href = '/login';
+                    return;
+                }
+                
+                // Cargar datos iniciales
+                await cargarTransacciones();
+                await cargarMovimientos();
+                actualizarEstadisticas();
+                
+            } catch (error) {
+                console.error('Error al verificar sesión:', error);
+                window.location.href = '/login';
+            }
+        });
+
+        // Función para mostrar alertas
+        function mostrarAlerta(mensaje, tipo = 'success') {
+            const alertElement = document.getElementById('alert');
+            alertElement.className = `alert alert-${tipo}`;
+            alertElement.textContent = mensaje;
+            alertElement.style.display = 'block';
+            
+            setTimeout(() => {
+                alertElement.style.display = 'none';
+            }, 5000);
+        }
+
+        // Función para consultar cuenta
+        async function consultarCuenta() {
+            const numCuenta = document.getElementById('consultaCuenta').value.trim();
+            
+            if (!numCuenta) {
+                mostrarAlerta('Por favor ingrese un número de cuenta', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/cuentas');
+                const cuentas = await response.json();
+                
+                const cuenta = cuentas.find(c => c[0] === numCuenta);
+                
+                if (cuenta) {
+                    document.getElementById('nombreCliente').textContent = cuenta[2];
+                    document.getElementById('saldoActual').textContent = `$${cuenta[3]?.toFixed(2) || '0.00'}`;
+                    document.getElementById('saldoDisponible').textContent = `$${cuenta[4]?.toFixed(2) || '0.00'}`;
+                    document.getElementById('tipoCuenta').textContent = cuenta[6] || 'N/A';
+                    document.getElementById('estadoCuenta').textContent = cuenta[7] || 'N/A';
+                    document.getElementById('resultadoConsulta').style.display = 'block';
+                } else {
+                    mostrarAlerta('Cuenta no encontrada', 'error');
+                    document.getElementById('resultadoConsulta').style.display = 'none';
+                }
+            } catch (error) {
+                console.error('Error al consultar cuenta:', error);
+                mostrarAlerta('Error al consultar la cuenta', 'error');
+            }
+        }
+
+        // Función para procesar transacción
+        document.getElementById('formTransaccion').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                tipo_transaccion: document.getElementById('tipoTransaccion').value,
+                monto: parseFloat(document.getElementById('montoTransaccion').value),
+                descripcion: document.getElementById('descripcionTransaccion').value,
+                cuenta_origen: document.getElementById('cuentaOrigen').value,
+                cuenta_destino: document.getElementById('cuentaDestino').value,
+                canal: 2 // Canal presencial/cajero
+            };
+            
+            try {
+                const response = await fetch('/api/transacciones', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    mostrarAlerta('Transacción procesada exitosamente');
+                    document.getElementById('formTransaccion').reset();
+                    await cargarTransacciones();
+                    actualizarEstadisticas();
+                } else {
+                    mostrarAlerta(result.message || 'Error al procesar transacción', 'error');
+                }
+            } catch (error) {
+                console.error('Error al procesar transacción:', error);
+                mostrarAlerta('Error al procesar la transacción', 'error');
+            }
+        });
+
+        // Función para registrar movimiento
+        document.getElementById('formMovimiento').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                id_cliente: parseInt(document.getElementById('clienteMovimiento').value),
+                num_cuenta: document.getElementById('cuentaMovimiento').value,
+                id_cajero: document.getElementById('cajeroMovimiento').value,
+                id_transaccion: document.getElementById('transaccionMovimiento').value,
+                tipo_movimiento: document.getElementById('tipoMovimiento').value,
+                factura: document.getElementById('facturaMovimiento').value
+            };
+            
+            try {
+                const response = await fetch('/api/movimientos-cajero', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    mostrarAlerta('Movimiento registrado exitosamente');
+                    document.getElementById('formMovimiento').reset();
+                    await cargarMovimientos();
+                    actualizarEstadisticas();
+                } else {
+                    mostrarAlerta(result.message || 'Error al registrar movimiento', 'error');
+                }
+            } catch (error) {
+                console.error('Error al registrar movimiento:', error);
+                mostrarAlerta('Error al registrar el movimiento', 'error');
+            }
+        });
+
+        // Función para cargar transacciones
+        async function cargarTransacciones() {
+            try {
+                const response = await fetch('/api/transacciones');
+                transacciones = await response.json();
+                mostrarTransacciones(transacciones);
+            } catch (error) {
+                console.error('Error al cargar transacciones:', error);
+            }
+        }
+
+        // Función para mostrar transacciones
+        function mostrarTransacciones(data) {
+            const tbody = document.querySelector('#tablaTransacciones tbody');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="loading">No hay transacciones registradas</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = data.map(transaccion => `
+                <tr>
+                    <td>${transaccion[0]}</td>
+                    <td>${transaccion[1]}</td>
+                    <td>$${transaccion[2]?.toFixed(2) || '0.00'}</td>
+                    <td>${transaccion[3] || 'N/A'}</td>
+                    <td>${transaccion[4] || 'N/A'}</td>
+                    <td>${transaccion[5] || 'N/A'}</td>
+                    <td>${transaccion[6] || 'N/A'}</td>
+                    <td>${transaccion[8] || 'N/A'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Función para cargar movimientos
+        async function cargarMovimientos() {
+            try {
+                const response = await fetch('/api/movimientos-cajero');
+                movimientos = await response.json();
+                mostrarMovimientos(movimientos);
+            } catch (error) {
+                console.error('Error al cargar movimientos:', error);
+            }
+        }
+
+        // Función para mostrar movimientos
+        function mostrarMovimientos(data) {
+            const tbody = document.querySelector('#tablaMovimientos tbody');
+            
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="loading">No hay movimientos registrados</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = data.map(movimiento => `
+                <tr>
+                    <td>${movimiento[0]}</td>
+                    <td>${movimiento[2]}</td>
+                    <td>${movimiento[3]}</td>
+                    <td>${movimiento[4]}</td>
+                    <td>${movimiento[5]}</td>
+                    <td>${movimiento[6]}</td>
+                    <td>${movimiento[7]}</td>
+                    <td>${movimiento[8] || 'N/A'}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Función para actualizar estadísticas
+        function actualizarEstadisticas() {
+            const hoy = new Date().toISOString().split('T')[0];
+            const transaccionesHoy = transacciones.filter(t => t[4] && t[4].includes(hoy));
+            
+            document.getElementById('totalTransacciones').textContent = transaccionesHoy.length;
+            document.getElementById('totalMovimientos').textContent = movimientos.length;
+        }
+
+        // Función para buscar transacciones
+        document.getElementById('searchTransacciones').addEventListener('input', function() {
+            const search = this.value.toLowerCase();
+            const filtradas = transacciones.filter(t => 
+                t[0]?.toLowerCase().includes(search) ||
+                t[3]?.toLowerCase().includes(search) ||
+                t[5]?.toLowerCase().includes(search) ||
+                t[6]?.toLowerCase().includes(search)
+            );
+            mostrarTransacciones(filtradas);
+        });
+
+        // Función para buscar movimientos
+        document.getElementById('searchMovimientos').addEventListener('input', function() {
+            const search = this.value.toLowerCase();
+            const filtrados = movimientos.filter(m => 
+                m[0]?.toLowerCase().includes(search) ||
+                m[2]?.toLowerCase().includes(search) ||
+                m[3]?.toLowerCase().includes(search) ||
+                m[4]?.toLowerCase().includes(search)
+            );
+            mostrarMovimientos(filtrados);
+        });
+
+        // Función para cerrar sesión
+        async function logout() {
+            try {
+                const response = await fetch('/auth/logout', {
+                    method: 'POST'
+                });
+                
+                if (response.ok) {
+                    window.location.href = '/login';
+                } else {
+                    alert('Error al cerrar sesión');
+                }
+            } catch (error) {
+                console.error('Error al cerrar sesión:', error);
+                alert('Error al cerrar sesión');
+            }
+        }
+    </script>
+</body>
+</html>
