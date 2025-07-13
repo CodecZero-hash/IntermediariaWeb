@@ -497,7 +497,8 @@
                 .then(data => {
                     if (data.success) {
                         document.getElementById('userName').textContent = data.user.username;
-                        if (data.user.role !== 'empleado') {
+						console.log(`user: ${JSON.stringify(data.user)}`)
+                        if (data.user.role !== 'EMPLEADO') {
                             alert('Acceso denegado');
                             window.location.href = '/login';
                         }
